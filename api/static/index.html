@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keycloak PoC - Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .nav {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .nav a:hover {
+            background: #0056b3;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        .success {
+            color: green;
+            margin: 10px 0;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .user-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .token-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Keycloak PoC Application</h1>
+        
+        <div class="nav">
+            <a href="#" onclick="showSection('home')">Home</a>
+            <a href="#" onclick="showSection('login')">Login</a>
+            <a href="#" onclick="showSection('register')">Register</a>
+            <a href="#" onclick="showSection('dashboard')" id="dashboardLink" class="hidden">Dashboard</a>
+            <a href="#" onclick="logout()" id="logoutLink" class="hidden">Logout</a>
+        </div>
+
+        <!-- Home Section -->
+        <div id="homeSection" class="section">
+            <h2>Welcome to the Keycloak PoC</h2>
+            <p>This application demonstrates:</p>
+            <ul>
+                <li>🔐 User authentication with Keycloak</li>
+                <li>🛡️ Protected API endpoints</li>
+                <li>🎫 JWT token-based authorization</li>
+                <li>🐳 Dockerized microservices architecture</li>
+            </ul>
+            
+            <h3>Quick Test - Public API</h3>
+            <button onclick="testPublicAPI()">Test Public Hello Endpoint</button>
+            <div id="publicResult" class="section hidden"></div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="section hidden">
+            <h2>Login</h2>
+            <p>Login with your Keycloak credentials to access protected features.</p>
+            
+            <div class="form-group">
+                <label for="loginUsername">Username:</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            
+            <button onclick="login()">Login</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="section hidden">
+            <h2>Register New User</h2>
+            <p>Create a new user account in Keycloak.</p>
+            
+            <div class="form-group">
+                <label for="regUsername">Username:</label>
+                <input type="text" id="regUsername" placeholder="Choose a username">
+            </div>
+            
+            <div class="form-group">
+                <label for="regEmail">Email:</label>
+                <input type="email" id="regEmail" placeholder="Enter your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="regFirstName">First Name:</label>
+                <input type="text" id="regFirstName" placeholder="Enter your first name">
+            </div>
+            
+            <div class="form-group">
+                <label for="regLastName">Last Name:</label>
+                <input type="text" id="regLastName" placeholder="Enter your last name">
+            </div>
+            
+            <div class="form-group">
+                <label for="regPassword">Password:</label>
+                <input type="password" id="regPassword" placeholder="Choose a password">
+            </div>
+            
+            <button onclick="register()">Register</button>
+            <div id="registerResult"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section hidden">
+            <h2>Protected Dashboard</h2>
+            <div id="userInfo" class="user-info"></div>
+            
+            <h3>Your Access Token</h3>
+            <div id="tokenDisplay" class="token-display"></div>
+            
+            <h3>Test Protected Endpoints</h3>
+            <button onclick="testProtectedAPI()">Call Protected Hello</button>
+            <button onclick="getUserInfo()">Get User Info</button>
+            
+            <div id="protectedResult" class="section"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let accessToken = null;
+
+        // Keycloak configuration
+        const KEYCLOAK_URL = 'http://localhost:8080';
+        const REALM = 'demo-realm';
+        const CLIENT_ID = 'demo-client';
+        const API_BASE = '';
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            accessToken = localStorage.getItem('access_token');
+            if (accessToken) {
+                showLoggedInState();
+                showSection('dashboard');
+            } else {
+                showSection('home');
+            }
+        });
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the requested section
+            document.getElementById(sectionName + 'Section').classList.remove('hidden');
+        }
+
+        function showLoggedInState() {
+            document.getElementById('dashboardLink').classList.remove('hidden');
+            document.getElementById('logoutLink').classList.remove('hidden');
+            
+            if (accessToken) {
+                document.getElementById('tokenDisplay').textContent = accessToken;
+            }
+        }
+
+        function hideLoggedInState() {
+            document.getElementById('dashboardLink').classList.add('hidden');
+            document.getElementById('logoutLink').classList.add('hidden');
+        }
+
+        async function testPublicAPI() {
+            try {
+                const response = await fetch(`${API_BASE}/hello`);
+                const data = await response.json();
+                
+                document.getElementById('publicResult').innerHTML = `
+                    <h4>Public API Response:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                document.getElementById('publicResult').classList.remove('hidden');
+            } catch (error) {
+                document.getElementById('publicResult').innerHTML = `
+                    <div class="error">Error: ${error.message}</div>
+                `;
+                document.getElementById('publicResult').classList.remove('hidden');
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                document.getElementById('loginResult').innerHTML = 
+                    '<div class="error">Please enter both username and password</div>';
+                return;
+            }
+
+            try {
+                // Use Keycloak token endpoint for authentication
+                const tokenUrl = `${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token`;
+                
+                const formData = new URLSearchParams();
+                formData.append('grant_type', 'password');
+                formData.append('client_id', CLIENT_ID);
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch(tokenUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const tokenData = await response.json();
+                    accessToken = tokenData.access_token;
+                    localStorage.setItem('access_token', accessToken);
+                    
+                    document.getElementById('loginResult').innerHTML = 
+                        '<div class="success">Login successful!</div>';
+                    
+                    showLoggedInState();
+                    setTimeout(() => showSection('dashboard'), 1000);
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('loginResult').innerHTML = 
+                        `<div class="error">Login failed: ${errorData.error_description || 'Invalid credentials'}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = 
+                    `<div class="error">Login error: ${error.message}</div>`;
+            }
+        }
+
+        async function register() {
+            // For now, show a message about manual registration
+            document.getElementById('registerResult').innerHTML = `
+                <div class="success">
+                    <h4>Registration Instructions:</h4>
+                    <p>For this PoC, please register users manually through Keycloak Admin Console:</p>
+                    <ol>
+                        <li>Go to <a href="${KEYCLOAK_URL}/admin" target="_blank">Keycloak Admin Console</a></li>
+                        <li>Login with admin credentials (admin/admin)</li>
+                        <li>Navigate to demo-realm > Users</li>
+                        <li>Click "Add user" and fill in the details</li>
+                        <li>Set a password in the Credentials tab</li>
+                    </ol>
+                    <p>Then you can login using the credentials you created.</p>
+                </div>
+            `;
+        }
+
+        async function testProtectedAPI() {
+            if (!accessToken) {
+                document.getElementById('protectedResult').innerHTML = 
+                    '<div class="error">No access token available</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/protected`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('protectedResult').innerHTML = `
+                        <h4>Protected API Response:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('protectedResult').innerHTML = 
+                        `<div class="error">Protected API Error: ${errorData.detail}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('protectedResult').innerHTML = 
+                    `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function getUserInfo() {
+            if (!accessToken) {
+                document.getElementById('protectedResult').innerHTML = 
+                    '<div class="error">No access token available</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/user-info`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('userInfo').innerHTML = `
+                        <h4>Current User:</h4>
+                        <p><strong>Username:</strong> ${data.username}</p>
+                        <p><strong>Email:</strong> ${data.email}</p>
+                        <p><strong>Name:</strong> ${data.first_name} ${data.last_name}</p>
+                        <p><strong>User ID:</strong> ${data.user_id}</p>
+                    `;
+                    
+                    document.getElementById('protectedResult').innerHTML = `
+                        <h4>User Info API Response:</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('protectedResult').innerHTML = 
+                        `<div class="error">User Info Error: ${errorData.detail}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('protectedResult').innerHTML = 
+                    `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            accessToken = null;
+            localStorage.removeItem('access_token');
+            hideLoggedInState();
+            showSection('home');
+            
+            // Clear user info
+            document.getElementById('userInfo').innerHTML = '';
+            document.getElementById('tokenDisplay').textContent = '';
+            document.getElementById('protectedResult').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
