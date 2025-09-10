@@ -45,12 +45,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
 
   # Python API service
   api:
@@ -69,14 +63,7 @@ services:
     networks:
       - keycloak-network
     depends_on:
-      keycloak:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      - keycloak
 
 networks:
   keycloak-network:
